@@ -12,17 +12,33 @@ import ARKit
 class ViewController: UIViewController, ARSCNViewDelegate {
 
     @IBOutlet weak var label: UILabel!
+    @IBOutlet weak var label2: UILabel!
+    @IBOutlet weak var label3: UILabel!
     @IBOutlet var sceneView: ARSCNView!
     var xyz: float_t = 0.2
+    var x: float_t = 0.2
+    var y: float_t = 0.2
+    var z: float_t = 0.2
     var isFirst = true
     var times = true
+    var count = 0
     let BoxNode = SCNNode()
     
     @IBAction func Slider(_ sender: UISlider) {
-        label.text = String(xyz)
-        xyz = Float(sender.value)
-        BoxNode.geometry = SCNBox(width: CGFloat(self.xyz), height: CGFloat(self.xyz), length: CGFloat(self.xyz), chamferRadius: 0)
-        
+        label.text = String(x)
+        x = Float(sender.value)
+        BoxNode.geometry = SCNBox(width: CGFloat(self.x), height: CGFloat(self.y), length: CGFloat(self.z), chamferRadius: 0)
+    }
+    @IBAction func Slidery(_ sender: UISlider) {
+        label2.text = String(y)
+        y = Float(sender.value)
+        BoxNode.geometry = SCNBox(width: CGFloat(self.x), height: CGFloat(self.y), length: CGFloat(self.z), chamferRadius: 0)
+        BoxNode.position.y = Float(0)
+    }
+    @IBAction func Sliderz(_ sender: UISlider) {
+        label3.text = String(z)
+        z = Float(sender.value)
+        BoxNode.geometry = SCNBox(width: CGFloat(self.x), height: CGFloat(self.y), length: CGFloat(self.z), chamferRadius: 0)
     }
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -48,7 +64,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // タップした時のaction追加
         let tapScreen = UITapGestureRecognizer(target: self, action: #selector(tapped))
         self.sceneView.addGestureRecognizer(tapScreen)
-        
+        //ドラッグのアクション
+        sceneView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(self.dragView(sender:))))
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -58,6 +75,19 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let configuration = ARWorldTrackingConfiguration()
         //平面認識
         configuration.planeDetection = .horizontal
+        
+        //configuration.environmentTexturing = .automatic
+
+        // People Occlusion が使える端末か判定
+        var message:String;
+            if ARWorldTrackingConfiguration.supportsFrameSemantics(.personSegmentationWithDepth) {
+                    // People Occlusion を使用する
+                configuration.frameSemantics = .personSegmentationWithDepth
+                message = "Ok! This device supports people occulusion."
+                } else {
+                    message = "No! This device don't support people occulusion."
+                }
+                print("\(message)")
 
         // Run the view's session
         sceneView.session.run(configuration)
@@ -75,7 +105,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             if self.isFirst {
                 self.isFirst = false
             }
-            else if self.isFirst == false && self.times == true{
+            else if self.isFirst == false && self.times == true && self.count == 2{
                 self.BoxNode.geometry = SCNBox(width: CGFloat(self.xyz), height: CGFloat(self.xyz), length: CGFloat(self.xyz), chamferRadius: 0)
                 self.BoxNode.position.y += Float(0.05)
                 self.BoxNode.rotation = SCNVector4(0, 1, 0, 0)
@@ -92,10 +122,28 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
         // タップした箇所が取得できていればアンカーを追加
         if !hitTest.isEmpty {
+            count = 2
             let anchor = ARAnchor(transform: hitTest.first!.worldTransform)
             sceneView.session.add(anchor: anchor)
         }
     }
+    @objc func dragView(sender: UIGestureRecognizer) {
+            let tapPoint = sender.location(in: sceneView)
+            
+            let results = sceneView.hitTest(tapPoint, types: .existingPlane)
+            if !results.isEmpty {
+                if let result = results.first ,
+                    let anchor = result.anchor ,
+                    let BoxNode = sceneView.node(for: anchor) {
+                    
+                    DispatchQueue.main.async(execute: {
+                        print("Success")
+                        // 実世界の座標をSCNVector3で返したものを反映
+                        self.BoxNode.position = SCNVector3(result.worldTransform.columns.3.x, result.worldTransform.columns.3.y, result.worldTransform.columns.3.z)
+                    })
+                }
+            }
+        }
 
     // MARK: - ARSCNViewDelegate
     
