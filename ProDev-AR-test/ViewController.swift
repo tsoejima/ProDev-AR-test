@@ -11,11 +11,19 @@ import ARKit
 
 class ViewController: UIViewController, ARSCNViewDelegate {
 
+    @IBOutlet weak var label: UILabel!
     @IBOutlet var sceneView: ARSCNView!
     var xyz: float_t = 0.2
     var isFirst = true
     var times = true
+    let BoxNode = SCNNode()
     
+    @IBAction func Slider(_ sender: UISlider) {
+        label.text = String(xyz)
+        xyz = Float(sender.value)
+        BoxNode.geometry = SCNBox(width: CGFloat(self.xyz), height: CGFloat(self.xyz), length: CGFloat(self.xyz), chamferRadius: 0)
+        
+    }
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -40,6 +48,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // タップした時のaction追加
         let tapScreen = UITapGestureRecognizer(target: self, action: #selector(tapped))
         self.sceneView.addGestureRecognizer(tapScreen)
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -67,11 +76,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 self.isFirst = false
             }
             else if self.isFirst == false && self.times == true{
-        let BoxNode = SCNNode()
-            BoxNode.geometry = SCNBox(width: CGFloat(self.xyz), height: CGFloat(self.xyz), length: CGFloat(self.xyz), chamferRadius: 0)
-                BoxNode.position.y += Float(0.05)
-                BoxNode.rotation = SCNVector4(0, 1, 0, 0)
-                node.addChildNode(BoxNode)
+                self.BoxNode.geometry = SCNBox(width: CGFloat(self.xyz), height: CGFloat(self.xyz), length: CGFloat(self.xyz), chamferRadius: 0)
+                self.BoxNode.position.y += Float(0.05)
+                self.BoxNode.rotation = SCNVector4(0, 1, 0, 0)
+                node.addChildNode(self.BoxNode)
                 self.times = false
             }
         }
