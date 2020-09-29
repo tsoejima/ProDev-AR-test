@@ -4,7 +4,6 @@
 //
 //  Created by 副島拓哉 on 2020/09/28.
 //
-
 import UIKit
 import SceneKit
 import ARKit
@@ -41,11 +40,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         z = Float(sender.value)
         BoxNode.geometry = SCNBox(width: CGFloat(self.x), height: CGFloat(self.y), length: CGFloat(self.z), chamferRadius: 0)
     }
-    enum CategoryBitMask: Int {
-            case categoryToSelect = 2        // 010
-            case otherCategoryToSelect = 4   // 100
-            // you can add more bit masks below . . .
-        }
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -71,7 +65,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let tapScreen = UITapGestureRecognizer(target: self, action: #selector(tapped))
         self.sceneView.addGestureRecognizer(tapScreen)
         //ドラッグのアクション
-        /*sceneView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(self.dragView(sender:))))*/
+            /*sceneView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(self.dragView(sender:))))*/
     }
     
     override func viewWillAppear(_ animated: Bool) {
