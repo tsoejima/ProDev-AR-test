@@ -15,6 +15,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     @IBOutlet weak var label2: UILabel!
     @IBOutlet weak var label3: UILabel!
     @IBOutlet var sceneView: ARSCNView!
+    var selectedNode: SCNNode?
     var xyz: float_t = 0.2
     var x: float_t = 0.2
     var y: float_t = 0.2
@@ -33,13 +34,18 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         label2.text = String(y)
         y = Float(sender.value)
         BoxNode.geometry = SCNBox(width: CGFloat(self.x), height: CGFloat(self.y), length: CGFloat(self.z), chamferRadius: 0)
-        BoxNode.position.y = Float(0)
+        BoxNode.position.y += abs(y - (y-0.0000001))
     }
     @IBAction func Sliderz(_ sender: UISlider) {
         label3.text = String(z)
         z = Float(sender.value)
         BoxNode.geometry = SCNBox(width: CGFloat(self.x), height: CGFloat(self.y), length: CGFloat(self.z), chamferRadius: 0)
     }
+    enum CategoryBitMask: Int {
+            case categoryToSelect = 2        // 010
+            case otherCategoryToSelect = 4   // 100
+            // you can add more bit masks below . . .
+        }
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -65,7 +71,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let tapScreen = UITapGestureRecognizer(target: self, action: #selector(tapped))
         self.sceneView.addGestureRecognizer(tapScreen)
         //ドラッグのアクション
-        sceneView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(self.dragView(sender:))))
+        /*sceneView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(self.dragView(sender:))))*/
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -106,11 +112,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 self.isFirst = false
             }
             else if self.isFirst == false && self.times == true && self.count == 2{
-                self.BoxNode.geometry = SCNBox(width: CGFloat(self.xyz), height: CGFloat(self.xyz), length: CGFloat(self.xyz), chamferRadius: 0)
-                self.BoxNode.position.y += Float(0.05)
+                self.BoxNode.geometry = SCNBox(width: CGFloat(self.x), height: CGFloat(self.y), length: CGFloat(self.z), chamferRadius: 0)
+                //self.BoxNode.position.y += Float(0.05)
                 self.BoxNode.rotation = SCNVector4(0, 1, 0, 0)
                 node.addChildNode(self.BoxNode)
-                self.times = false
+                self.times = true
             }
         }
     }
@@ -127,7 +133,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             sceneView.session.add(anchor: anchor)
         }
     }
-    @objc func dragView(sender: UIGestureRecognizer) {
+    /*@objc func dragView(sender: UIGestureRecognizer) {
             let tapPoint = sender.location(in: sceneView)
             
             let results = sceneView.hitTest(tapPoint, types: .existingPlane)
@@ -140,10 +146,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                         print("Success")
                         // 実世界の座標をSCNVector3で返したものを反映
                         self.BoxNode.position = SCNVector3(result.worldTransform.columns.3.x, result.worldTransform.columns.3.y, result.worldTransform.columns.3.z)
+                        self.BoxNode.geometry = SCNBox(width: CGFloat(self.x), height: CGFloat(self.y), length: CGFloat(self.z), chamferRadius: 0)
                     })
                 }
             }
-        }
+        }*/
 
     // MARK: - ARSCNViewDelegate
     
